@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <title>memberdashboard</title>
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+          
+          .bar {
+            width: 20px;
+            height: 2px;
+            background-color: #333;
+            margin: 5px 0;
+            background-color:aliceblue;
+          }
+          .dropdown {
+            position: relative;
+            display: inline-block;
+          }
+          .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #282828;
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+          }
+      
+          .dropdown-content a {
+            color: rgb(216, 216, 216);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+          }
+      
+          .dropdown-content a:hover {
+            background-color: #f1f1f1;
+          }
+          .buttons-container {
+            display: flex;
+            gap: 15px;
+          }
+
+          .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+        
+     </style>
+  <script>
+    var bookx = JSON.parse('{{ bookx_data_list | tojson | safe }}');
+    var idx =JSON.parse('{{idx | tojson | safe }}');
+    console.log(bookx);
+  </script>
+</head>
+<body>
+    <div class="dropdown-content" id="listnxt" style="position: absolute; top: 10%; left: auto; right: 0; border-radius:10px">
+        <a id="bookStacksLink" href="http://127.0.0.1:5000/generalbooks/">Book stacks</a>
+        <a id="stat" href="http://127.0.0.1:5000/memstat/" + idx["idx"]>Statistics</a>
+      </div>
+<script>
+  var bookStacksLink = document.getElementById("bookStacksLink");
+bookStacksLink.href = "http://127.0.0.1:5000/generalbooks/" + idx["idx"];
+var statsLink = document.getElementById("stat");
+statsLink.href = "http://127.0.0.1:5000/memstat/" + idx["idx"];
+</script>
+    <header style="background-color:#2e2e30 ; height:70px;">
+<div class="row" style="padding-top:15px;">
+    <div class="col-md-9 ms-3"><font color=white><h2>ShelfMate</h2></font></div>
+    <div class="col-md-1 ms-5">  <button type="button" class="btn btn-light" onclick="intro()">Logout</button></div>
+    <script>
+
+    function intro(){
+      fetch('/memDashboard/1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer your-access-token',
+        },
+        body: JSON.stringify({id: 1}),
+        redirect: 'manual'
+      }).then(response => {
+        if (response.ok) {
+          return response.json();  // Return the promise to chain another .then
+        } else {
+          console.error('Failed to log in');
+          throw new Error('Failed to log in');  // Throw an error to skip the next .then
+        }
+      }).then(data => {
+                window.location.href = data.redirect_url;
+      }).catch(error => {
+        console.error('Error during login:', error);
+      });
+      
+}
+    </script>
+    <div class="col-md-1">
+   
+        <button type="button" class="btn btn-dark" style="border-width: 1px; border-style: solid; border-color: white; margin-left:0px;" onclick="showDropdown()">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </button>
+    </div>
+</div>
+<script>
+    function showDropdown() {
+      var dropdown = document.getElementById("listnxt");
+      if (dropdown.style.display === "none" || dropdown.style.display === "") {
+        dropdown.style.display = "block";
+      } else {
+        dropdown.style.display = "none";
+      }
+    }
+  </script>
+    </header>
+    <div style="background-color:#161616; min-height: 100vh; width: 100%; display: flex; flex-direction: column; width:100%">
+        <br>
+        <form>
+            <div class="row">
+                <div class="col-md-5" style="margin-left:130px;">
+                    <input class="form-control" id="search" name="valsrch" placeholder="Search by book name">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-light" onclick="getValue()">Search</button>
+                </div>
+            </div>
+        </form>     
+        <script>
+          function getValue() {
+            event.preventDefault();
+              var searchInput = document.getElementById('search');
+              var inputValue = searchInput.value;
+              console.log('Input Value:', inputValue);
+      
+              // Assuming bookx is a global variable or defined in the scope
+              var z = [];
+              var changeElement = document.getElementById("change");
+              
+              // Clear existing content
+              changeElement.innerHTML = '';
+      
+              for (var i = 0; i < bookx.length; i++) {
+                  if (bookx[i]["Name"] == inputValue || bookx[i]["Section"] == inputValue || bookx[i]["Author"] == inputValue) {
+                      z.push(bookx[i]); // Use push instead of append
+                  }
+              }
+      
+              for (var i = 0; i < z.length; i++) {
+                  // Use createElement to create li element
+                  var liElement = document.createElement("li");
+                  liElement.className = "list-group-item";
+                  liElement.style.width = "80vw";
+                  var lik = z[i]["content"];
+                  console.log("the link to it is" + lik);
+                  liElement.setAttribute("put1",z[i]["id"])
+                  // Create anchor element
+                  var anchorElement = document.createElement("a");
+                  anchorElement.href = lik; // Set the href attribute
+                  
+                  // Create button element with the anchor element inside
+                  var buttonElement = document.createElement("button");
+                  buttonElement.type = "button";
+                  buttonElement.className = "btn btn-secondary btn-sm";
+                  buttonElement.style.marginLeft = "auto";
+                  buttonElement.appendChild(anchorElement); // Append the anchor element to the button
+                  
+                  // Set inner HTML for li element
+                  liElement.innerHTML = z[i]["Name"] + '||' + z[i]["Author"] + '||' + z[i]["Section"] + lik+
+                      buttonElement.outerHTML + // Use outerHTML to get the full HTML representation of the button
+                  
+                      '<button type="button" class="btn btn-secondary btn-sm" style="margin-left:5px;" onclick="bookreturn(this)"return</button>';
+                  
+                  // Append the li element to the changeElement
+                  changeElement.appendChild(liElement);
+                  
+              }
+          }
+      </script>
+      
+       
+        <br>
+        <h4 style="color:antiquewhite;padding-left:40px;">Your books</h4>
+    <br>
+    <ul class="list-group" id="change">
+    
+    </ul>
+
+    <script>
+      function setxx()
+      {
+        var changeElement = document.getElementById("change");
+              
+        // Clear existing content
+        changeElement.innerHTML = '';
+        for (var i = 0; i < bookx.length; i++) {
+          // Use createElement to create li element
+          var liElement = document.createElement("li");
+          liElement.className = "list-group-item";
+          liElement.style.width = "80vw";
+          liElement.id =bookx[i]["id"]
+          liElement.setAttribute("put1",bookx[i]["id"])
+          // Set inner HTML for li element
+          liElement.innerHTML = bookx[i]["Name"] + '||' + bookx[i]["Author"] + '||' + bookx[i]["Section"] +
+              '<button type="button" class="btn btn-secondary btn-sm" style="margin-left:auto;">' +
+              '<a href ="' + bookx[i]["content"] + '">view</a></button>' +
+              '<button type="button" class="btn btn-secondary btn-sm" style="margin-left:5px;" onclick ="bookreturn(this)">return</button>';
+
+          // Append the li element to the changeElement
+          changeElement.appendChild(liElement);
+      }
+      }
+      setxx();
+    </script>
+    <script>
+      function bookreturn(lix)
+      {
+        var x= lix.parentElement.getAttribute("put1");
+        var y = idx["idx"];
+        var adding='http://127.0.0.1:5000/returnhandle/' + x +'/'+ y;
+        fetch( adding, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer your-access-token',
+          },
+          redirect: 'manual'
+        }).then(response => {
+          // Handle the response from the server
+          if (response.ok) {
+              console.log('Request sent successfully');
+              alert('Returned successfully');
+              var myDiv = document.getElementById(x);
+              if (myDiv) {
+                  myDiv.remove();
+              }
+
+          } else {
+              console.error('Failed to send request:', response.statusText);
+          }
+      })
+      .catch(error => {
+          console.error('Error sending request:', error);
+      });
+        
+      }
+    </script>
+
+</body>
+
+</html>

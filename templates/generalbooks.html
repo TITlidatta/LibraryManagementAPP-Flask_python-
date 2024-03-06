@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <title>generalbooks</title>
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+          
+          .bar {
+            width: 20px;
+            height: 2px;
+            background-color: #333;
+            margin: 5px 0;
+            background-color:aliceblue;
+          }
+        
+     </style>
+     <script>
+      var bookG = JSON.parse('{{ bookG | tojson | safe }}');
+      var idx =JSON.parse('{{idx | tojson | safe }}');
+      console.log(bookG);
+    </script>
+</head>
+<body>
+
+    <header style="background-color:#2e2e30 ; height:70px;">
+<div class="row" style="padding-top:15px;">
+    <div class="col-md-9 ms-3"><font color=white><h2>ShelfMate</h2></font> </div>
+    <div class="col-md-1 ms-4"><button type="button" class="btn btn-light" onclick="headto()">dashboard</button></div>
+    <div class="col-md-1 ms-4">
+        <button type="button" class="btn btn-light" onclick="moveto()">Statistics</button>
+    </div>
+</div>
+<script>
+  function headto()
+  {
+    window.location.href=  "http://127.0.0.1:5000/memDashboard/" + idx["idx"];
+  }
+  function moveto()
+  {
+    window.location.href=  "http://127.0.0.1:5000/memstat/" + idx["idx"];
+  }
+</script>
+    </header>
+    <div style="background-color:#161616; min-height: 100vh; width: 100%; display: flex; flex-direction: column; width:100%">
+        <br>
+       
+        <form action="/submit" method="get">
+            <div class="row">
+                <div class="col-md-5" style="margin-left:130px;">
+                    <input type="text" class="form-control" id="search" name="valsrch" placeholder="Search by book name">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-light">Search</button>
+                </div>
+            </div>
+        </form>  
+        <br><br>
+        <div class="container" >
+            <div class="row" id="bookshow">
+          </div>
+        </div>  
+        <script>
+
+          function generateBookList() {
+              var container = document.getElementById("bookshow");
+      
+              for (let i = 0; i < bookG.length; i++) {
+                  var book = bookG[i];
+      
+                  // Create the HTML elements
+                  var colDiv = document.createElement("div");
+                  colDiv.className = "col-md-2 mb-4";
+      
+                  var cardDiv = document.createElement("div");
+                  cardDiv.className = "card";
+                  cardDiv.style = "height:50vh;width:13vw;";
+      
+                  var img = document.createElement("img");
+                  img.className = "card-img-top";
+                  img.src = book["Bimage"]; // Assuming each book object has an 'image' property
+                  img.alt = "Book Cover";
+                  img.style = "height:28vh;";
+      
+                  var cardBodyDiv = document.createElement("div");
+                  cardBodyDiv.className = "card-body d-flex flex-column";
+      
+                  var title = document.createElement("p");
+                  title.className = "card-title";
+                  title.textContent = book["Name"];
+                  title.style="margin-bottom:1px; font-size: 13px;";
+      
+                  var author = document.createElement("p");
+                  author.className = "card-text";
+                  author.textContent = book["Author"]+book["id"];
+                  author.style="margin-bottom:1px; font-size: 13px;";
+      
+                  var requestBtn = document.createElement("a");
+                  requestBtn.href = "#";
+                  requestBtn.className = "btn btn-sm btn-primary mt-auto";
+                  requestBtn.textContent = "Request";
+                  requestBtn.style="font-size: 12px; padding: 2px 2px;";
+                  requestBtn.setAttribute('data-book-id', book["id"]);
+
+                  requestBtn.addEventListener("click", function (event) {
+                      // Retrieve book ID from the data attribute
+                      var bookId = event.target.getAttribute('data-book-id');
+                      sendRequestToServer(bookId, idx["idx"]);
+                  });
+              
+      
+                  // Append the elements to construct the hierarchy
+                  cardBodyDiv.appendChild(title);
+                  cardBodyDiv.appendChild(author);
+                  cardBodyDiv.appendChild(requestBtn);
+      
+                  cardDiv.appendChild(img);
+                  cardDiv.appendChild(cardBodyDiv);
+      
+                  colDiv.appendChild(cardDiv);
+      
+                  // Append the column to the container
+                  container.appendChild(colDiv);
+              }
+          }
+
+          function sendRequestToServer(x,y){
+             var adding='http://127.0.0.1:5000/requesthandle';
+            fetch( adding, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer your-access-token',
+              },
+              body: JSON.stringify({idb: x,idu:y}),
+              redirect: 'manual'
+            }).then(response => {
+              // Handle the response from the server
+              if (response.ok) {
+                  console.log('Request sent successfully');
+              } else {
+                  console.error('Failed to send request:', response.statusText);
+              }
+          })
+          .catch(error => {
+              console.error('Error sending request:', error);
+          });
+            
+      }
+      
+          // Call the function to generate the book list
+          generateBookList();
+        </script>
+        
+      
+</body>
+
+</html>

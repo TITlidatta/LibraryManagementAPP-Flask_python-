@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <title>requests</title>
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+          
+          .bar {
+            width: 20px;
+            height: 2px;
+            background-color: #333;
+            margin: 5px 0;
+            background-color:aliceblue;
+          }
+          #clik
+          {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        
+     </style>
+     <script>
+      var bbk = JSON.parse('{{ bbk | tojson | safe }}');
+    </script>
+</head>
+<body>
+
+    <header style="background-color:#2e2e30 ; height:70px;">
+<div class="row" style="padding-top:15px;">
+    <div class="col-md-10 ms-3"><font color=white><h2>ShelfMate</h2></font> </div>
+    <div class="col-md-1 ms-3">
+        <button type="button" class="btn btn-light"><a href="http://127.0.0.1:5000/libstat">Statistics</a></button>
+    </div>
+</div>
+
+    </header>
+    <div style="background-color:#161616; min-height: 100vh; width: 100%; display: flex; flex-direction: column; width:100%">
+        <br>
+      <br>
+       <font><h5 style="color:antiquewhite;padding-left:10px;">New requsts</h5></font>
+       <br>
+        <ul class="list-group">
+            {% for i in bbk %}
+            <li class="list-group-item d-flex justify-content-between align-items-center" style="width:80vw;  padding-left:30px; margin-bottom:5px;  margin-left:30px;">{{i['Name']}}  ||  {{i['Author']}} | user id - {{i['user']}}
+                <div class ="ml-auto">
+                    <button type="button" class="btn btn-secondary btn-sm" ui = {{i['user']}}  bi = {{i['bookid']}} onclick="grnt(this)">grant</button>
+                    <button type="button" class="btn btn-secondary btn-sm" ui = {{i['user']}}  bi = {{i['bookid']}} onclick="rejct(this)">reject</button>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <script>
+          function grnt(g)
+          {
+            var x= g.getAttribute("bi");
+            var y = g.getAttribute("ui");
+            var adding='http://127.0.0.1:5000/grantreject/' + x +'/'+ y+'/' + 1;
+            fetch( adding, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer your-access-token',
+              },
+              redirect: 'manual'
+            }).then(response => {
+              // Handle the response from the server
+              if (response.ok) {
+                  console.log('Request sent successfully');
+                  alert('granted successfully');
+    
+              } else {
+                  console.error('Failed to send request:', response.statusText);
+              }
+          })
+          .catch(error => {
+              console.error('Error sending request:', error);
+          });
+          }
+
+          function rejct(r)
+          {
+            var x= r.getAttribute("bi");
+            var y = r.getAttribute("ui");
+            var adding='http://127.0.0.1:5000/grantreject/' + x +'/'+ y+'/' + 0;
+            fetch( adding, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer your-access-token',
+              },
+              redirect: 'manual'
+            }).then(response => {
+              // Handle the response from the server
+              if (response.ok) {
+                  console.log('Request sent successfully');
+                  alert('rejected successfully');
+    
+              } else {
+                  console.error('Failed to send request:', response.statusText);
+              }
+          })
+          .catch(error => {
+              console.error('Error sending request:', error);
+          });
+          }
+        </script>
+     <br>
+     <font><h5 style="color:antiquewhite; padding-left:10px;">Old requsts</h5></font>
+     <br>
+     <ul class="list-group">
+        <li class="list-group-item" style="width:80vw;  padding-left:30px;  margin-bottom:5px; margin-left:30px;">{{name}}||{{author}}|<span id="clik">user01</span><button type="button" class="btn btn-secondary btn-sm" style="margin-left:70%">revoke</button> </li>
+        <li class="list-group-item"style="width:80vw;  padding-left:30px; margin-bottom:5px; margin-left:30px;" >{{name}}||{{author}}|<span id="clik">user01</span><button type="button" class="btn btn-secondary btn-sm" style="margin-left:70%">revoke</button></li>
+        <li class="list-group-item" style="width:80vw;  padding-left:30px; margin-bottom:5px; margin-left:30px;">{{name}}||{{author}}|<span id="clik">user01</span><button type="button" class="btn btn-secondary btn-sm" style="margin-left:70%">revoke</button></li>
+      </ul>
+
+</body>
+
+</html>
